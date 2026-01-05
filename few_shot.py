@@ -1,21 +1,33 @@
-import pandas as pd
+import os
 import json
-
+import pandas as pd
+import streamlit as st
 
 class FewShotPosts:
     def __init__(self, file_path="data/processed_posts.json"):
         self.df = None
         self.unique_tags = None
-        self.load_posts(file_path)
 
-    def load_posts(self, file_path):
-        with open(file_path, encoding="utf-8") as f:
+        # Build absolute path (works in local + Streamlit Cloud)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        abs_path = os.path.join(base_dir, file_path)
+
+        # If processed file missing, generate it
+        if not os.path.exists(abs_path):
+            st.warning("processed_posts.json missing. Generating from raw_posts.json...")
+            from preprocess import process_posts
+            os.makedirs(os.path.join(base_dir, "data"), exist_ok=True)
+            process_posts(
+                os.path.join(base_dir, "data", "raw_posts.json"),
+                os.path.join(base_dir, "data", "processed_posts.json")
+            )
+
+        self.load_posts(abs_path)
+
+    def load_posts(self, abs_path):
+        with open(abs_path, encoding="utf-8") as f:
             posts = json.load(f)
             self.df = pd.json_normalize(posts)
-            self.df['length'] = self.df['line_count'].apply(self.categorize_length)
-            # collect unique tags
-            all_tags = self.df['tags'].apply(lambda x: x).sum()
-            self.unique_tags = list(set(all_tags))
 
     def get_filtered_posts(self, length, language, tag):
         df_filtered = self.df[
@@ -41,4 +53,5 @@ if __name__ == "__main__":
     fs = FewShotPosts()
     # print(fs.get_tags())
     posts = fs.get_filtered_posts("Medium","Hinglish","Job Search")
+
     print(posts)
