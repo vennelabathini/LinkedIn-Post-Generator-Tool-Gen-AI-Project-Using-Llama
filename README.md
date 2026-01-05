@@ -1,0 +1,2 @@
+# LinkedIn-Post-Generator-Tool-Gen-AI-Project-Using-Llama
+This end-to-end GenAI project enables users to automatically create professional LinkedIn content. It uses the Llama 3.2 large language model with the LangChain framework to produce engaging, context-aware posts in real time, featuring a Streamlit interface and a ChromaDB-based vector database for context management and improved output quality.
